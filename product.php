@@ -291,47 +291,53 @@ class ModelCatalogProduct extends Model {
 
 		$sql .= " GROUP BY p.product_id";
 
-		$sort_data = array(
-			'pd.name',
-			'p.model',
-			'p.quantity',
-			'p.price',
-			'rating',
-			'p.sort_order',
-			'p.date_added'
-		);
+        /* Sort by Model at seller Profile page */
+		if (!empty($data['filter_seller_id'])) {
+			$sql .= " ORDER BY p.model ASC";
+        } else {
+        /* Sort by Model at seller Profile page */
 
-		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
-				$sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
-			} elseif ($data['sort'] == 'p.price') {
-				$sql .= " ORDER BY (CASE WHEN special IS NOT NULL THEN special WHEN discount IS NOT NULL THEN discount ELSE p.price END)";
-			} else {
-				$sql .= " ORDER BY " . $data['sort'];
-			}
-		} else {
-			$sql .= " ORDER BY p.sort_order";
-		}
+            $sort_data = array(
+                'pd.name',
+                'p.model',
+                'p.quantity',
+                'p.price',
+                'rating',
+                'p.sort_order',
+                'p.date_added'
+            );
 
-		
-        /* Sort by login time */
-        if (isset($data['order']) && ($data['order'] == 'DESC') && !empty($data['filter_name'])) {
-            //$sql .= " DESC, cug.sort_order ASC, MAX(cua.date_added) ASC, LCASE(pd.name) DESC";
-            $sql .= " DESC, cug.sort_order ASC, MAX(cua.date_added) ASC";
-        } elseif (!empty($data['filter_name'])) {
-            //$sql .= " ASC, cug.sort_order DESC, MAX(cua.date_added) DESC, LCASE(pd.name) ASC";
-            $sql .= " ASC, cug.sort_order DESC, MAX(cua.date_added) DESC";
-        } elseif (isset($data['order']) && ($data['order'] == 'DESC')) {
-        /* Sort by login time */
-    
-			//$sql .= " DESC, LCASE(pd.name) DESC";
-		} else {
-			//$sql .= " ASC, LCASE(pd.name) ASC";
-		}
-		
-		if (!empty($data['filter_name'])) {
-			$sql .= ", cu.customer_group_id DESC";
-		}
+            if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+                if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
+                    $sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
+                } elseif ($data['sort'] == 'p.price') {
+                    $sql .= " ORDER BY (CASE WHEN special IS NOT NULL THEN special WHEN discount IS NOT NULL THEN discount ELSE p.price END)";
+                } else {
+                    $sql .= " ORDER BY " . $data['sort'];
+                }
+            } else {
+                $sql .= " ORDER BY p.sort_order";
+            }
+
+            
+            if (isset($data['order']) && ($data['order'] == 'DESC')) {
+                $sql .= " DESC";
+            } else {
+                $sql .= " ASC";
+            }
+
+            /* Sort by login time */
+            if (isset($data['order']) && ($data['order'] == 'DESC') && !empty($data['filter_name'])) {
+                $sql .= ", cug.sort_order ASC, MAX(cua.date_added) ASC";
+            } elseif (!empty($data['filter_name'])) {
+                $sql .= ", cug.sort_order DESC, MAX(cua.date_added) DESC";
+            }
+            /* Sort by login time */
+            
+            if (!empty($data['filter_name'])) {
+                $sql .= ", cu.customer_group_id DESC";
+            }
+        }
 		
 		$sql .= ", p.top DESC";
 
